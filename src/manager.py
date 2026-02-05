@@ -265,7 +265,14 @@ class CookieManager:
             if "github.com" not in self.driver.current_url:
                 self.driver.get("https://github.com/404")
 
-            with open("cookies.pkl", "rb") as file:
+            cookie_file = "cookies.pkl"
+            if not os.path.exists(cookie_file):
+                # Check parent dir (if running from src/)
+                parent_cookie = os.path.join("..", "cookies.pkl")
+                if os.path.exists(parent_cookie):
+                    cookie_file = parent_cookie
+
+            with open(cookie_file, "rb") as file:
                 cookies = pickle.load(file)
                 for cookie in cookies:
                     try:

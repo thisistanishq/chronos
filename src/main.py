@@ -113,7 +113,12 @@ class APIKeyLeakageScanner:
 
         self.cookies = CookieManager(self.driver)
 
-        if os.path.exists("cookies.pkl"):
+        cookie_path = "cookies.pkl"
+        if not os.path.exists(cookie_path) and os.path.exists("../cookies.pkl"):
+             cookie_path = "../cookies.pkl"
+             
+        if os.path.exists(cookie_path):
+             # Update load() to potentially take a path or just rely on the smart logic we added to manager
              self.cookies.load()
 
         # Check if login is actually valid

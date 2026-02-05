@@ -678,10 +678,11 @@ class WorkerManager:
             # Serialize queries to JSON for CLI arg
             query_json = json.dumps(queries)
             
+            # Use absolute path to main.py
+            main_script = os.path.join(Config.BASE_DIR, "main.py")
             cmd = [
-                sys.executable, "-u", "src/main.py",
+                sys.executable, "-u", main_script,
                 "--ghost",          # Enable Ghost Mode
-                # "--info" removed - invalid argument
                 "--query-list", query_json
             ]
             
