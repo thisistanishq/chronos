@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#080808">
+    <meta name="description" content="CHRONOS Neural Asset Scanner - Real-time API Key Discovery Platform">
+
+    <!-- Performance: Preconnect to external resources -->
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.socket.io">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
+    <title>CHRONOS // Neural Interface</title>
+
+    <!-- Fonts: Clash Display & Space Grotesk -->
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@200,400,500,600,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="loading">
+
+    <!-- 3D Background Canvas -->
+    <div id="canvas-container"></div>
+
+    <!-- Noise Overlay -->
+    <div class="noise-overlay"></div>
+
+    <!-- Preloader -->
+    <div class="preloader">
+        <div class="loader-wrap">
+            <div class="loader-text">INITIALIZING <span class="counter">0</span>%</div>
+            <div class="loader-bar-bg">
+                <div class="loader-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cursor -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-circle"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="brand" data-target="hero">
+            <div class="brand-logo">C</div>
+            <span class="brand-name">CHRONOS</span>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="nav-btn" data-target="dashboard">DASHBOARD</a>
+            <a href="#" class="nav-btn" data-target="terminal">TERMINAL</a>
+            <a href="#" class="nav-btn" data-target="security">SECURITY</a>
+            <a href="#" class="nav-btn" data-target="vault">VAULT</a>
+        </div>
+        <div class="nav-status">
+            <span class="status-dot swarm-dot" style="background: var(--highlight);"></span>
+            <span id="swarm-status-text" style="margin-right: 15px; font-weight: bold; color: var(--highlight);">SWARM:
+                0</span>
+            <span id="socket-status-dot" class="status-dot" style="background: #ff3333"></span>
+            <span id="socket-status-text">OFFLINE</span>
+        </div>
+    </nav>
+
+    <!-- Toast Container for Real-time Feeds -->
+    <div id="toast-container"
+        style="position: fixed; bottom: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px;">
+    </div>
+
+    <!-- Main Content Container -->
+    <main id="main-content">
+
+        <!-- VIEW: HERO -->
+        <section id="hero" class="view-section active">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <div class="line">NEURAL</div>
+                    <div class="line">ASSET</div>
+                    <div class="line">SCANNER</div>
+                </h1>
+                <div class="hero-meta">
+                    <div class="meta-item">
+                        <span class="label">VERSION</span>
+                        <span class="value">v5.0.1</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="label">TARGET</span>
+                        <span class="value">GITHUB_API</span>
+                    </div>
+                    <div class="meta-actions">
+                        <button class="magnetic-btn primary start-scan">
+                            <span class="btn-text">INITIATE SCAN</span>
+                            <div class="btn-fill"></div>
+                        </button>
+                        <button class="magnetic-btn secondary disabled stop-scan">
+                            <span class="btn-text">ABORT</span>
+                            <div class="btn-fill"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- VIEW: DASHBOARD -->
+        <section id="dashboard" class="view-section">
+            <div class="section-container">
+                <div class="section-header">
+                    <h2>LIVE TELEMETRY</h2>
+                    <p>REAL-TIME DATA ACQUISITION</p>
+                </div>
+
+                <div class="bento-grid">
+                    <!-- Large Stat -->
+                    <div class="bento-item large">
+                        <div class="card-header">
+                            <h3>TOTAL IDENTIFIED ASSETS</h3>
+                            <i class="fa-solid fa-database"></i>
+                        </div>
+                        <div class="card-value" id="stat-total">0</div>
+                        <div class="card-graph">
+                            <div class="sparkline"></div>
+                        </div>
+                    </div>
+
+                    <!-- Medium Stats -->
+                    <div class="bento-item medium">
+                        <div class="card-header">
+                            <h3>TIER 1 (GPT-4)</h3>
+                            <i class="fa-solid fa-gem"></i>
+                        </div>
+                        <div class="card-value highlight" id="stat-tier1">0</div>
+                        <div class="card-sub">HIGH VALUE TARGETS</div>
+                    </div>
+
+                    <div class="bento-item medium">
+                        <div class="card-header">
+                            <h3>CRITICAL RISK</h3>
+                            <i class="fa-solid fa-radiation"></i>
+                        </div>
+                        <div class="card-value danger" id="stat-risk">0</div>
+                        <div class="card-sub">IMMEDIATE ACTION REQ</div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="bento-item wide glass-card">
+                        <div class="card-header">
+                            <h3>DISTRIBUTION ANALYSIS</h3>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="mainChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: SECURITY (NEW) -->
+        <section id="security" class="view-section">
+            <div class="section-container full-height">
+                <div class="security-grid">
+
+                    <!-- LEFT: IMMUTABLE LEDGER -->
+                    <div class="security-col ledger-col">
+                        <div class="sec-header">
+                            <h3><i class="fa-solid fa-link"></i> IMMUTABLE LEDGER</h3>
+                            <span class="status-indicator active">SYNCED</span>
+                        </div>
+                        <div class="ledger-feed" id="ledger-feed">
+                            <!-- Items populated by JS -->
+                            <div class="ledger-item genesis">
+                                <span class="hash">GENESIS_BLOCK_00000000</span>
+                                <span class="time">SYSTEM_INIT</span>
+                            </div>
+                        </div>
+                        <div class="enc-status">
+                            <i class="fa-solid fa-lock"></i>
+                            <div>
+                                <div class="enc-title">AES-256 ENCRYPTION</div>
+                                <div class="enc-sub">DATA AT REST: SECURED</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CENTER: THREAT MAP & HONEYPOT -->
+                    <div class="security-col threat-col">
+                        <div class="sec-header">
+                            <h3><i class="fa-solid fa-shield-halved"></i> ACTIVE DEFENSE LOG</h3>
+                            <span class="status-indicator danger pulse">ARMED</span>
+                        </div>
+                        <div class="terminal-body" id="honeypot-log"
+                            style="height: 100%; border: 1px solid rgba(255, 0, 60, 0.2);">
+                            <div class="log-line system">[SYSTEM] HONEYPOT TRAPS DEPLOYED...</div>
+                            <div class="log-line system">[SYSTEM] MONITORING VECTORS: /admin, /.env, /wp-admin</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: TERMINAL -->
+        <section id="terminal" class="view-section">
+            <div class="section-container full-height">
+                <div class="terminal-wrapper">
+                    <div class="terminal-header">
+                        <div class="term-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <div class="term-title">SYSTEM_LOGS_V2 // <span class="live-tag">LIVE</span></div>
+                        <div class="term-actions">
+                            <button class="action-btn start-scan" title="Initiate Scan"><i class="fa-solid fa-play"></i>
+                                SCAN</button>
+                            <button class="action-btn stop-scan disabled" title="Abort Scan"><i
+                                    class="fa-solid fa-stop"></i> ABORT</button>
+                            <span class="divider"></span>
+                            <button class="icon-btn" onclick="clearTerminal()" title="Clear Terminal"><i
+                                    class="fa-solid fa-eraser"></i></button>
+                        </div>
+                    </div>
+                    <div class="terminal-body" id="term-output">
+                        <div class="log-line system">[SYSTEM] INTERFACE CONNECTED.</div>
+                        <div class="log-line system">[SYSTEM] AWAITING INPUT...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: VAULT -->
+        <section id="vault" class="view-section">
+            <div class="section-container">
+                <div class="section-header">
+                    <div class="view-header">
+                        <h2>INTELLIGENCE VAULT</h2>
+                        <div class="control-bar">
+                            <!-- TABS -->
+                            <div class="vault-tabs">
+                                <button class="tab-btn active" onclick="setVaultTab('active')">ACTIVE KEYS</button>
+                                <button class="tab-btn" onclick="setVaultTab('inactive')">INACTIVE KEYS</button>
+                            </div>
+
+                            <!-- ACTIONS -->
+                            <div class="action-group">
+                                <select id="export-format" class="cyber-select">
+                                    <option value="json">JSON</option>
+                                </select>
+                                <button class="cyber-btn" onclick="exportVault()">DOWNLOAD DATA</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vault-container">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>API KEY</th>
+                                <th>RISK SCORE</th>
+                                <th>CONTEXT</th>
+                                <th>TIER (QUOTA)</th>
+                                <th>STATUS</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vault-table-body">
+                            <!-- Populated via Socket.IO -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer = Scrolling Marquee -->
+    <footer class="marquee-container">
+        <div class="marquee-content"
+            style="animation: marquee 25s linear infinite; display: flex; white-space: nowrap;">
+            <span
+                style="color: #000000; font-size: 0.85rem; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; padding-right: 50px;">
+                // CHRONOS SYSTEM: SECURE CONNECTION ESTABLISHED // SCANNING GLOBAL REPOSITORIES // SEARCHING FOR LEAKED
+                CREDENTIALS // ANALYZING RISK VECTORS // PROTECTING ASSETS //
+            </span>
+            <span
+                style="color: #000000; font-size: 0.85rem; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; padding-right: 50px;">
+                // CHRONOS SYSTEM: SECURE CONNECTION ESTABLISHED // SCANNING GLOBAL REPOSITORIES // SEARCHING FOR LEAKED
+                CREDENTIALS // ANALYZING RISK VECTORS // PROTECTING ASSETS //
+            </span>
+        </div>
+    </footer>
+
+    <!-- INTELLIGENCE DOSSIER MODAL -->
+    <div id="key-modal" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span class="glitch-text" data-text="INTELLIGENCE DOSSIER">INTELLIGENCE DOSSIER</span>
+                    <div class="modal-subtitle" id="modal-key-id">KEY_ID_HASH_X92</div>
+                </div>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">RISK LEVEL</div>
+                        <div class="stat-value flicker-text" id="modal-risk">0%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">CLEARANCE</div>
+                        <div class="stat-value" id="modal-tier" style="color:var(--highlight)">UNKNOWN</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">CONTEXT</div>
+                        <div class="stat-value" id="modal-context">Analyzing...</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">ORIGIN</div>
+                        <div class="stat-value" id="modal-found">00:00:00</div>
+                    </div>
+                </div>
+
+                <div class="code-viewer">
+                    <div class="code-header">SOURCE_INTERCEPT.py</div>
+                    <pre><code id="modal-snippet"># No Intelligence Data Available</code></pre>
+                </div>
+
+                <div class="repo-stats">
+                    <span>🌟 STARS: <b id="modal-stars">0</b></span>
+                    <span>🔱 FORKS: <b id="modal-forks">0</b></span>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="cyber-btn" id="modal-copy-btn">COPY FULL KEY</button>
+                <button class="cyber-btn danger" onclick="closeModal()">CLOSE DOSSIER</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- T&C Modal -->
+    <div id="tnc-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>Terms & Conditions</h2>
+            </div>
+            <div class="modal-content">
+                <h3>1. Acceptance of Terms</h3>
+                <p>By downloading, installing, or running the CHRONOS software ("the Software"), you agree to be bound
+                    by these Terms and Conditions ("Terms"). If you do not agree to these Terms, do not use the
+                    Software.</p>
+
+                <h3>2. Authorized Use Only (Ethical Research Covenant)</h3>
+                <p>CHRONOS is a high-performance security auditing tool designed for <strong>defensive security (Blue
+                        Team)</strong> and <strong>authorized penetration testing (Red Team)</strong> purposes only.</p>
+                <ul>
+                    <li><strong>You MUST NOT</strong> use this Software to scan repositories, servers, or networks you
+                        do not own or have explicit written permission to test.</li>
+                    <li><strong>You MUST NOT</strong> use discovered credentials (API keys, secrets) for any purpose
+                        other than reporting the finding to the asset owner for remediation.</li>
+                    <li><strong>You MUST NOT</strong> sell, trade, or exploit leaked credentials found by the Software.
+                    </li>
+                </ul>
+                <p><strong>Violation of this section may violate the Computer Fraud and Abuse Act (CFAA) or other
+                        applicable laws.</strong> The developers of CHRONOS assume no responsibility for unauthorized or
+                    illegal use.</p>
+
+                <h3>3. "As-Is" Disclaimer</h3>
+                <p>The Software is provided "AS IS", without warranty of any kind.</p>
+
+                <h3>4. Limitation of Liability</h3>
+                <p>In no event shall the authors be liable for any claim arising from the use of the Software.</p>
+
+                <p>---<br><strong>BY CLICKING ACCEPT, YOU ACKNOWLEDGE THAT YOU ARE A SECURITY RESEARCHER ACTING IN GOOD
+                        FAITH.</strong></p>
+            </div>
+            <div class="modal-actions">
+                <button id="btn-reject" class="btn-reject">Reject</button>
+                <button id="btn-accept" class="tnc-accept-btn">Accept_</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Libraries -->
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <!-- Three.js r134 (Required for Vanta) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <!-- Vanta.js Net Effect -->
+    <script src="vanta.net.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Socket.IO Client (for production real-time) -->
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+
+    <!-- App Script -->
+    <script src="script.js?v=fix_final"></script>
+</body>
+
+</html>
