@@ -1,0 +1,33 @@
+# Production Dependencies for CHRONOS
+# Install with: pip install -r requirements-prod.txt
+
+# Core Flask
+Flask>=3.0.0
+flask-cors>=6.0.0
+flask-socketio>=5.3.0
+flask-limiter>=3.5.0
+
+# Async workers
+gevent>=24.0.0
+gevent-websocket>=0.10.1
+gunicorn>=21.0.0
+
+# Redis for pub/sub and caching
+redis>=5.0.0
+
+# Celery for background tasks
+celery>=5.3.0
+
+# Database
+SQLAlchemy>=2.0.0
+psycopg2-binary>=2.9.0
+
+# Scanner dependencies (already in project)
+selenium>=4.15.0
+tqdm>=4.66.0
+rich>=13.0.0
+openai>=1.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+cryptography>=41.0.0
