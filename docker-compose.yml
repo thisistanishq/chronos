@@ -1,0 +1,122 @@
+# CHRONOS Production Stack
+# Scalable deployment with Redis, Celery workers, and load-balanced web servers
+
+version: '3.8'
+
+services:
+  # Redis - Message broker and cache
+  redis:
+    image: redis:7-alpine
+    container_name: chronos-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL - Production database (optional, can use SQLite for smaller deployments)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: chronos-db
+  #   environment:
+  #     POSTGRES_DB: chronos
+  #     POSTGRES_USER: chronos
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD:-chronos_secure_2025}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U chronos"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # Web Server - Scales horizontally
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # container_name: chronos-web
+    ports:
+      - "5050:5050"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-chronos-neural-scanner-2025}
+      - FLASK_DEBUG=false
+    volumes:
+      - ./github.db:/app/github.db
+      - ./cookies.pkl:/app/cookies.pkl
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      replicas: 4  # Scale this based on load
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    command: >
+      gunicorn 
+      --worker-class geventwebsocket.gunicorn.workers.GeventWebSocketWorker
+      --workers 4
+      --bind 0.0.0.0:5050
+      --timeout 120
+      --keep-alive 65
+      --access-logfile -
+      src.server_production:app
+
+  # Celery Worker - Background scan tasks
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # container_name: chronos-worker
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - ./github.db:/app/github.db
+      - ./cookies.pkl:/app/cookies.pkl
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      replicas: 2  # Number of concurrent scans supported
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G  # Selenium needs more memory
+    command: celery -A src.server_production.celery worker --loglevel=info --concurrency=1
+
+  # NGINX Load Balancer (for production with multiple web replicas)
+  nginx:
+    image: nginx:alpine
+    container_name: chronos-lb
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./web:/usr/share/nginx/html:ro
+    depends_on:
+      - web
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+
+volumes:
+  redis_data:
+  # postgres_data:
+
+networks:
+  default:
+    name: chronos-network
