@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHRONOS: PERFECT EDITION</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.js"></script>
+    <style>
+        body {
+            background-color: #050505;
+            background-image:
+                radial-gradient(white, rgba(255, 255, 255, .2) 2px, transparent 40px),
+                radial-gradient(white, rgba(255, 255, 255, .15) 1px, transparent 30px),
+                radial-gradient(white, rgba(255, 255, 255, .1) 2px, transparent 40px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            /* Mobile safe area */
+            height: 100dvh;
+            overflow: hidden;
+            font-family: 'Comic Neue', cursive;
+            padding-bottom: 20px;
+        }
+
+        /* WRAPPER */
+        #book-wrapper {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            min-height: 0;
+            overflow: visible;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* FLIPBOOK SIZING LOGIC */
+        .flip-book {
+            box-shadow: 0 20px 80px rgba(255, 255, 255, 0.1);
+            display: block;
+
+            /* MOBILE DEFAULT: SQUARE (1-PAGE view) */
+            width: 90vw;
+            height: 90vw;
+            max-height: calc(100vh - 160px);
+            max-width: calc(100vh - 160px);
+            /* Keep it square relative to height too */
+        }
+
+        /* DESKTOP: LANDSCAPE (2-PAGE view) */
+        @media (min-width: 1024px) {
+            .flip-book {
+                /* We want a landscape aspect ratio (e.g., 2 pages of 1:1 or 3:4) */
+                /* Let's aim for roughly 3:2 bounding box */
+                height: calc(100vh - 140px);
+                width: calc((100vh - 140px) * 1.5);
+
+                /* But don't exceed screen width */
+                max-width: 90vw;
+                max-height: calc(90vw * 0.66);
+                /* Inverse of 1.5 aspect ratio */
+            }
+        }
+
+        .page {
+            background-color: #000;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .page.--hard {
+            border: 4px solid gold;
+        }
+
+        .page-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+
+        .bubble {
+            position: absolute;
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 40px;
+            padding: 10px 20px;
+            text-align: center;
+            box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+            font-weight: bold;
+            font-size: 1rem;
+            color: #000;
+            z-index: 10;
+            max-width: 200px;
+            font-family: 'Comic Neue', cursive;
+        }
+
+        .bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 30px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #000 transparent;
+            display: block;
+            width: 0;
+        }
+
+        .box {
+            position: absolute;
+            background: #ffd700;
+            border: 3px solid #000;
+            padding: 5px 15px;
+            font-weight: bold;
+            box-shadow: 5px 5px 0px rgba(0, 0, 0, 1);
+            z-index: 10;
+            text-transform: uppercase;
+            font-family: 'Bangers', cursive;
+            letter-spacing: 1px;
+            font-size: 1.5rem;
+            color: black;
+        }
+
+        .sfx {
+            font-family: 'Bangers', cursive;
+            position: absolute;
+            color: #ff0040;
+            font-size: 5rem;
+            transform: rotate(-5deg);
+            text-shadow: 3px 3px 0 #fff, 0px 0px 10px rgba(255, 0, 0, 0.8);
+            z-index: 15;
+            pointer-events: none;
+            -webkit-text-stroke: 2px black;
+        }
+
+        .top-left {
+            top: 20px;
+            left: 20px;
+        }
+
+        .top-right {
+            top: 20px;
+            right: 20px;
+        }
+
+        .bottom-left {
+            bottom: 20px;
+            left: 20px;
+        }
+
+        .bottom-right {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .center {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @media (max-width: 768px) {
+            .sfx {
+                font-size: 3rem;
+            }
+
+            .bubble {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- WRAPPER -->
+    <div id="book-wrapper">
+        <div id="book" class="flip-book">
+
+            <!-- COVER -->
+            <div class="page" data-density="hard">
+                <img src="assets/chronos_comic_cover_1767637970879.png" class="page-image">
+            </div>
+
+            <!-- 1. INTRO -->
+            <div class="page" data-density="hard">
+                <img src="assets/chronos_book_cover_1767953948223.png" class="page-image">
+                <div class="box center">THE SAGA BEGINS</div>
+            </div>
+
+            <!-- 2. ORIGIN -->
+            <div class="page">
+                <img src="dev.png" class="page-image">
+                <div class="bubble top-left">"I'm writing a universe."</div>
+                <div class="box bottom-right bg-blue-400">THE ARCHITECT</div>
+            </div>
+
+            <!-- 3. CORP -->
+            <div class="page">
+                <img src="shadow_corp.png" class="page-image">
+                <div class="box top-right bg-gray-400">SHADOW CORP</div>
+                <div class="bubble bottom-left">"Monetize the universe."</div>
+            </div>
+
+            <!-- [NEW] 3.5. HUMAN ORIGIN: THE DREAM -->
+            <div class="page">
+                <img src="assets/noir_student.png" class="page-image">
+                <div class="box top-left bg-white text-black">YEAR -10</div>
+                <div class="bubble bottom-right">"I just wanted to build something beautiful."</div>
+            </div>
+
+            <!-- [NEW] 3.6. HUMAN ORIGIN: THE LOSS -->
+            <div class="page">
+                <img src="assets/noir_hospital.png" class="page-image">
+                <div class="bubble top-center">"Why does everything have to die?"</div>
+            </div>
+
+            <!-- [NEW] 3.7. HUMAN ORIGIN: THE OATH -->
+            <div class="page">
+                <img src="assets/noir_mom.png" class="page-image">
+                <div class="bubble bottom-left">"I will save their memories. Forever."</div>
+            </div>
+
+            <!-- [NEW] 3.8. HUMAN ORIGIN: ISOLATION -->
+            <div class="page">
+                <img src="assets/noir_terrace.png" class="page-image">
+                <div class="sfx center text-gray-500">ALONE</div>
+                <div class="bubble top-right">"If reality fails... I'll make a new one."</div>
+            </div>
+
+            <!-- [NEW] 4. THE BREACH -->
+            <div class="page">
+                <img src="assets/chronos_breach.png" class="page-image">
+                <div class="sfx center text-red-500">ALARM!</div>
+                <div class="bubble bottom-right">"Firewall breach detected!"</div>
+            </div>
+
+            <!-- [NEW] 5. VILLAIN REVEAL -->
+            <div class="page">
+                <img src="assets/film_villain_drk_1767956513385.png" class="page-image">
+                <div class="box bottom-center bg-black text-red-500">THE ENTROPY</div>
+                <div class="bubble top-left">"I am the inevitable crash."</div>
+            </div>
+
+            <!-- 6. THREAT -->
+            <div class="page">
+                <img src="assets/comic_city_destruction.png" class="page-image">
+                <div class="sfx center">GLITCH!</div>
+                <div class="bubble bottom-right">"The code is breaking!"</div>
+            </div>
+
+            <!-- [NEW] 7. CHAOS -->
+            <div class="page">
+                <img src="assets/film_chaos_1767956536549.png" class="page-image">
+                <div class="sfx top-right text-purple-500">ERROR</div>
+                <div class="bubble bottom-left">"It's consuming everything!"</div>
+            </div>
+
+            <!-- 8. ADMIN FURY -->
+            <div class="page">
+                <img src="assets/comic_admin_angry.png" class="page-image">
+                <div class="sfx top-left text-red-600">NO!</div>
+                <div class="bubble bottom-right">"Who is tampering with my build?!"</div>
+            </div>
+
+            <!-- 9. HERO 1: SPEED -->
+            <div class="page">
+                <img src="comic_tempos_tsunami.png" class="page-image">
+                <div class="sfx center text-cyan-400">ZOOOM!</div>
+                <div class="bubble bottom-left">"Need a fix? I'm already there."</div>
+            </div>
+
+            <!-- 10. HERO 2: POWER -->
+            <div class="page">
+                <img src="comic_bulwark_meteor.png" class="page-image">
+                <div class="sfx top-right text-orange-500">BOOM!</div>
+                <div class="bubble bottom-left">"I'm the firewall."</div>
+            </div>
+
+            <!-- [NEW] 11. REINFORCEMENTS -->
+            <div class="page">
+                <img src="assets/chronos_hero_entry.png" class="page-image">
+                <div class="box top-left bg-blue-600 text-white">BACKUP ARRIVED</div>
+                <div class="bubble bottom-right">"You didn't think you'd fight alone?"</div>
+            </div>
+
+            <!-- [NEW] 11.1. FANTASY SECTOR: FALLEN -->
+            <div class="page">
+                <img src="assets/chronos_fantasy_citadel.png" class="page-image">
+                <div class="box top-right bg-purple-600 text-white">SECTOR 7: FANTASY</div>
+                <div class="sfx center text-red-500">CRACK!</div>
+                <div class="bubble bottom-left">"The sky... it's shattering!"</div>
+            </div>
+
+            <!-- [NEW] 11.2. FANTASY SECTOR: DEFENSE -->
+            <div class="page">
+                <img src="assets/chronos_fantasy_armory.png" class="page-image">
+                <div class="bubble top-left">"Swords against glitches? We are doomed."</div>
+            </div>
+
+            <!-- [NEW] 11.3. FANTASY SECTOR: LOST KNOWLEDGE -->
+            <div class="page">
+                <img src="assets/chronos_fantasy_scroll.png" class="page-image">
+                <div class="bubble center">"The ancient code... it's deleting itself."</div>
+            </div>
+
+            <!-- [NEW] 12. THE SWARM -->
+            <div class="page">
+                <img src="assets/chronos_swarm_attack.png" class="page-image">
+                <div class="sfx center text-green-500">SKREEE!</div>
+                <div class="bubble top-left">"There are too many of them!"</div>
+            </div>
+
+            <!-- 13. CLASH -->
+            <div class="page">
+                <img src="assets/comic_glitch_titan.png" class="page-image">
+                <div class="sfx center text-white">GRAAAH!</div>
+                <div class="box top-left bg-black text-white border-red-500">FATAL ERROR</div>
+            </div>
+
+            <!-- 14. SAVE -->
+            <div class="page">
+                <img src="assets/comic_pulse_save.png" class="page-image">
+                <div class="bubble top-center">"Hold on! I've got you!"</div>
+            </div>
+
+            <!-- [NEW] 15. ADMIN DESCENDS -->
+            <div class="page">
+                <img src="assets/comic_admin_descends_1767975984729.png" class="page-image">
+                <div class="box center bg-white text-black">GOD MODE: ON</div>
+            </div>
+
+            <!-- 16. DUEL -->
+            <div class="page">
+                <img src="assets/comic_cipher_duel.png" class="page-image">
+                <div class="sfx bottom-left text-green-500">HACK!</div>
+                <div class="bubble top-right">"Rewriting enemy kernel..."</div>
+            </div>
+
+            <!-- [NEW] 17. TEAM UP -->
+            <div class="page">
+                <img src="assets/chronos_team_up.png" class="page-image">
+                <div class="sfx center text-yellow-300">SYNC!</div>
+                <div class="bubble bottom-center">"Compile the final patch!"</div>
+            </div>
+
+            <!-- [NEW] 17.1. CONFRONTATION -->
+            <div class="page">
+                <img src="film_confrontation.png" class="page-image">
+                <div class="bubble top-center">"You can't delete pain, Architect."</div>
+                <div class="bubble bottom-center">"But I can learn from it."</div>
+            </div>
+
+            <!-- [NEW] 17.2. REDEMPTION -->
+            <div class="page">
+                <img src="film_redemption.png" class="page-image">
+                <div class="sfx center text-white">FORGIVE</div>
+                <div class="bubble bottom-right">"The shadow is part of the light."</div>
+            </div>
+
+            <!-- 18. THE NULL -->
+            <div class="page">
+                <img src="comic_the_null.png" class="page-image">
+                <div class="box center bg-black text-white">THE VOID</div>
+                <div class="bubble bottom-center">"Everything returns to zero."</div>
+            </div>
+
+            <!-- 19. ASSEMBLE -->
+            <div class="page">
+                <img src="comic_climax.png" class="page-image">
+                <div class="sfx center text-yellow-400">TOGETHER!</div>
+            </div>
+
+            <!-- 20. VICTORY -->
+            <div class="page">
+                <img src="victory.png" class="page-image">
+                <div class="box top-right bg-green-500">SYSTEM RESTORED</div>
+            </div>
+
+            <!-- [NEW] 21. THE FUTURE -->
+            <div class="page">
+                <img src="assets/chronos_future_city.png" class="page-image">
+                <div class="box top-left bg-blue-200">VERSION 2.0</div>
+                <div class="bubble bottom-right">"A better world."</div>
+            </div>
+
+            <!-- [NEW] 22. HARMONY -->
+            <div class="page">
+                <img src="assets/chronos_romance.png" class="page-image">
+                <div class="bubble top-center">"Runtime: Peaceful."</div>
+            </div>
+
+            <!-- 23. ENDING (REQUESTED) -->
+            <div class="page">
+                <img src="film_ending.png" class="page-image">
+                <div class="box bottom-center bg-white text-black text-2xl"
+                    style="bottom: 40px; left: 50%; transform: translateX(-50%);">THE END</div>
+                <div class="bubble top-center">"The loop completes... ready for Version 2.0?"</div>
+            </div>
+
+            <!-- [NEW] 23.5 CREDITS -->
+            <div class="page">
+                <div class="page-image bg-black flex flex-col justify-center items-center text-white p-10 text-center">
+                    <h1 class="text-4xl font-bold mb-5" style="font-family: 'Bangers'">CREDITS</h1>
+                    <p class="mb-2">Story & Art by</p>
+                    <h2 class="text-2xl text-yellow-500 mb-5">THE ARCHITECT</h2>
+                    <p class="text-sm text-gray-400">Powered by Chronos Engine</p>
+                    <p class="text-sm text-gray-400 mt-2">© 2026 Shadow Corp</p>
+                </div>
+            </div>
+
+            <!-- 24. BACK COVER -->
+            <div class="page" data-density="hard">
+                <img src="assets/chronos_blueprint.png" class="page-image">
+                <div class="sfx center text-white text-3xl">PROJECT CHRONOS</div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- CONTROLS CONTAINER -->
+    <div class="z-50 flex gap-8 pb-4">
+        <button id="prevBtn"
+            class="bg-[#ffd700] hover:bg-[#ffe033] text-black border-4 border-black font-bold py-3 px-10 text-2xl shadow-[4px_4px_0px_#000] -rotate-1 hover:rotate-0 transition-all cursor-pointer select-none active:translate-y-1 active:shadow-none relative z-50 pointer-events-auto"
+            style="font-family: 'Bangers'">
+            &larr; PREV
+        </button>
+        <button id="nextBtn"
+            class="bg-[#ffd700] hover:bg-[#ffe033] text-black border-4 border-black font-bold py-3 px-10 text-2xl shadow-[4px_4px_0px_#000] rotate-1 hover:rotate-0 transition-all cursor-pointer select-none active:translate-y-1 active:shadow-none relative z-50 pointer-events-auto"
+            style="font-family: 'Bangers'">
+            NEXT &rarr;
+        </button>
+    </div>
+
+    <!-- Hidden watermark -->
+    <div class="fixed bottom-5 right-5 text-white/10 text-xs font-mono z-50 pointer-events-none">
+        CHRONOS: PERFECT EDITION
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const bookElement = document.getElementById('book');
+
+            // Initialization
+            const pageFlip = new St.PageFlip(bookElement, {
+                // STRETCH MODE makes the canvas fit the parent div (#book) which we sized with CSS.
+                size: 'stretch',
+
+                minWidth: 300,
+                minHeight: 300,
+                maxWidth: 1600,
+                maxHeight: 1600,
+
+                showCover: true,
+                mobileScrollSupport: false,
+                flippingTime: 800,
+                usePortrait: false, // Force 2-page view for typical comic look
+                startPage: 0,
+
+                maxShadowOpacity: 0.5,
+                drawShadow: true,
+                clickEvent: false
+            });
+
+            // LOAD PAGES
+            pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+
+            // CONTROLS 
+            // We use click on the buttons.
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    console.log('Prev clicked');
+                    pageFlip.flipPrev();
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    console.log('Next clicked');
+                    pageFlip.flipNext();
+                });
+            }
+
+            // KEYBOARD
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') pageFlip.flipNext();
+                if (e.key === 'ArrowLeft') pageFlip.flipPrev();
+            });
+        });
+    </script>
+</body>
+
+</html>
