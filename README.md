@@ -1,5 +1,5 @@
 # CHRONOS: Neural Asset Intelligence System
-**v5.0.1 // Defensive Security Research Artifact**
+**Defensive Security Research Artifact**
 
 > ⚠️ **DISCLAIMER: FOR SECURITY RESEARCH AND DEFENSIVE ADVERSARIAL SIMULATION ONLY.**
 > This tool is designed to help organizations identify, track, and remediate leaked API credentials within their own infrastructure. The authors are not responsible for misuse. Use responsibly and ethically.
